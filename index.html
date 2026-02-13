@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Convertisseur Ping en Secondes</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #f4f4f9; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input { padding: 10px; width: 100px; border: 1px solid #ccc; border-radius: 5px; }
+        .result { margin-top: 20px; font-weight: bold; color: #2c3e50; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Calculateur de Ping</h2>
+    <label>Entrez votre Ping (ms) :</label><br><br>
+    <input type="number" id="pingInput" placeholder="ex: 150" oninput="convertir()">
+    
+    <div class="result" id="resultat">
+        Résultat : 0 seconde
+    </div>
+</div>
+
+<script>
+    function convertir() {
+        const ms = document.getElementById('pingInput').value;
+        const secondes = ms / 1000;
+        document.getElementById('resultat').innerText = `Résultat : ${secondes} seconde(s)`;
+    }
+</script>
+
+</body>
+</html>
