@@ -2,33 +2,161 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Convertisseur Ping en Secondes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ping Liquid Glass</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #f4f4f9; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        input { padding: 10px; width: 100px; border: 1px solid #ccc; border-radius: 5px; }
-        .result { margin-top: 20px; font-weight: bold; color: #2c3e50; }
+        :root {
+            --deep-blue: #040b2e;
+            --liquid-blue: #0077ff;
+            --glass-border: rgba(0, 195, 255, 0.3);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--deep-blue);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Effet de vagues liquides en arrière-plan */
+        body::before, body::after {
+            content: "";
+            position: absolute;
+            width: 150vw;
+            height: 150vw;
+            background: var(--liquid-blue);
+            opacity: 0.15;
+            border-radius: 45%;
+            z-index: -1;
+            animation: rotate 15s linear infinite;
+        }
+
+        body::before { top: -80%; left: -20%; }
+        body::after { bottom: -80%; right: -20%; animation-duration: 25s; opacity: 0.1; }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Carte Glassmorphism Liquide */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px) saturate(180%);
+            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            border: 2px solid var(--glass-border);
+            border-radius: 30px;
+            padding: 40px;
+            width: 85%;
+            max-width: 380px;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), inset 0 0 20px rgba(0, 119, 255, 0.2);
+        }
+
+        h2 { 
+            color: #00d2ff; 
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            text-shadow: 0 0 15px rgba(0, 210, 255, 0.6);
+            margin-top: 0;
+        }
+        
+        input {
+            width: 90%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 195, 255, 0.4);
+            border-radius: 15px;
+            color: #fff;
+            font-size: 1.5rem;
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #00d2ff;
+            box-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+        }
+
+        .result-container {
+            margin-top: 35px;
+            padding: 25px;
+            background: rgba(0, 119, 255, 0.1);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 119, 255, 0.2);
+        }
+
+        .result-value {
+            display: block;
+            font-weight: 800;
+            color: #ffffff;
+            font-size: clamp(1.5rem, 10vw, 3rem);
+            word-wrap: break-word;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        #unit {
+            color: #00d2ff;
+            font-weight: bold;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 4px;
+            display: block;
+            margin-top: 10px;
+        }
+
+        p { color: rgba(255, 255, 255, 0.5); font-size: 0.8rem; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Calculateur de Ping</h2>
-    <label>Entrez votre Ping (ms) :</label><br><br>
-    <input type="number" id="pingInput" placeholder="ex: 150" oninput="convertir()">
-    
-    <div class="result" id="resultat">
-        Résultat : 0 seconde
+    <div class="glass-card">
+        <h2>PING</h2>
+        <p>ENTRE TES MILLISECONDES</p>
+        <input type="number" id="pingInput" placeholder="0" oninput="convert()">
+        
+        <div class="result-container">
+            <span class="result-value" id="val">0</span>
+            <span id="unit">SECONDE</span>
+        </div>
     </div>
-</div>
 
-<script>
-    function convertir() {
-        const ms = document.getElementById('pingInput').value;
-        const secondes = ms / 1000;
-        document.getElementById('resultat').innerText = `Résultat : ${secondes} seconde(s)`;
-    }
-</script>
+    <script>
+        function convert() {
+            const input = document.getElementById('pingInput');
+            const display = document.getElementById('val');
+            const unit = document.getElementById('unit');
+            
+            let ms = input.value;
+            
+            if (ms !== "" && ms >= 0) {
+                let sec = ms / 1000;
+                
+                // Nettoyage mathématique pour éviter les bugs de précision (ex: 1.00000000001)
+                let cleanResult = Number(Math.round(sec + 'e6') + 'e-6');
+
+                // Si le nombre est trop long pour l'écran, on utilise l'exponentielle
+                if (cleanResult.toString().length > 12) {
+                    display.innerText = cleanResult.toExponential(2);
+                } else {
+                    display.innerText = cleanResult;
+                }
+                
+                // Pluriel à partir de 2 secondes
+                unit.innerText = (sec >= 2) ? "SECONDES" : "SECONDE";
+            } else {
+                display.innerText = "0";
+                unit.innerText = "SECONDE";
+            }
+        }
+    </script>
 
 </body>
 </html>
