@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ping Master Pro - All Devices</title>
+    <title>Ping Master Pro - Supabase Cloud</title>
     <style>
         :root {
             --deep-blue: #040b2e;
@@ -12,199 +12,213 @@
             --neon-cyan: #00d2ff;
         }
 
-        /* Reset de base pour éviter les décalages sur mobile */
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
-            margin: 0; padding: 0; 
-            min-height: 100vh;
+            margin: 0; padding: 0; min-height: 100vh;
             display: flex; justify-content: center; align-items: center;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--deep-blue);
-            overflow: hidden; position: relative;
+            overflow: hidden; position: relative; color: white;
         }
 
-        /* Animation de fond (s'adapte à la taille de la fenêtre) */
+        /* Arrière-plan animé */
         body::before, body::after {
-            content: ""; position: absolute;
-            width: 200vmax; height: 200vmax; /* vmax garantit que ça couvre tout même en rotation */
-            background: var(--liquid-blue);
-            opacity: 0.12; border-radius: 42%;
-            z-index: -1; animation: rotate 25s linear infinite;
+            content: ""; position: absolute; width: 200vmax; height: 200vmax;
+            background: var(--liquid-blue); opacity: 0.1; border-radius: 42%;
+            z-index: -1; animation: rotate 30s linear infinite;
         }
         body::before { top: -150vmax; left: -50vmax; }
-        body::after { bottom: -150vmax; right: -50vmax; animation-duration: 40s; opacity: 0.08; }
-
+        body::after { bottom: -150vmax; right: -50vmax; animation-duration: 45s; }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Carte Principale Adaptative */
+        /* Carte Glassmorphism */
         .glass-card {
             background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
             border: 1px solid var(--glass-border);
-            border-radius: clamp(20px, 5vw, 30px);
-            padding: clamp(20px, 8vw, 40px);
-            width: 90%; 
-            max-width: 420px;
-            text-align: center;
+            border-radius: 25px; padding: clamp(20px, 5vw, 40px);
+            width: 90%; max-width: 400px; text-align: center;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-            margin: 20px;
+            display: none; animation: fadeIn 0.5s ease;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        h2 { 
-            color: var(--neon-cyan); 
-            letter-spacing: 2px; 
-            font-size: clamp(1.2rem, 6vw, 1.8rem);
-            margin-bottom: 20px;
-        }
+        h2 { color: var(--neon-cyan); letter-spacing: 2px; font-size: 1.4rem; margin-bottom: 20px; }
 
+        /* Formulaires & Inputs */
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { font-size: 0.65rem; color: var(--neon-cyan); text-transform: uppercase; font-weight: bold; margin-bottom: 5px; display: block; }
+        
         input {
-            width: 100%; 
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(0, 195, 255, 0.3);
-            border-radius: 12px; 
-            color: #fff;
-            font-size: 1.5rem; 
-            text-align: center; 
-            outline: none;
-            appearance: none; /* Enlève le style par défaut sur iOS */
+            width: 100%; padding: 14px; background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(0, 195, 255, 0.2); border-radius: 12px;
+            color: #fff; font-size: 1rem; outline: none; transition: 0.3s;
         }
+        input:focus { border-color: var(--neon-cyan); box-shadow: 0 0 10px rgba(0, 210, 255, 0.2); }
 
-        .result-container {
-            margin-top: clamp(20px, 5vw, 30px);
-            padding: clamp(15px, 5vw, 25px);
-            background: rgba(0, 119, 255, 0.1);
-            border-radius: 20px;
-            border: 1px solid rgba(0, 119, 255, 0.15);
+        .main-btn {
+            width: 100%; padding: 14px; background: var(--neon-cyan); color: var(--deep-blue);
+            border: none; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px;
         }
+        .main-btn:hover { transform: scale(1.02); box-shadow: 0 0 20px var(--neon-cyan); }
 
-        .result-value {
-            display: block; 
-            font-weight: 800; 
-            color: #ffffff;
-            font-size: clamp(1.8rem, 12vw, 3rem);
-            word-wrap: break-word;
-        }
+        .switch-link { font-size: 0.8rem; margin-top: 20px; cursor: pointer; color: rgba(255,255,255,0.6); }
+        .switch-link span { color: var(--neon-cyan); text-decoration: underline; }
 
-        /* Bouton "Curieux" Adaptatif */
+        /* Calculateur de Ping */
+        .ping-display { font-size: 3rem; font-weight: 800; display: block; margin: 10px 0; }
+        .result-container { background: rgba(0, 119, 255, 0.1); padding: 20px; border-radius: 20px; border: 1px solid rgba(0,119,255,0.1); }
+
+        /* Bouton Détails Animé */
         .info-btn {
-            margin-top: 25px;
-            background: rgba(0, 210, 255, 0.05);
-            border: 1px solid var(--neon-cyan);
-            color: var(--neon-cyan);
-            padding: 12px 24px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            font-weight: bold;
-            letter-spacing: 1px;
-            animation: pulse-glow 2s infinite, nudge 6s infinite;
-            width: auto;
+            margin-top: 20px; background: transparent; border: 1px solid var(--neon-cyan);
+            color: var(--neon-cyan); padding: 10px 20px; border-radius: 20px; cursor: pointer;
+            font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
+            animation: pulse-glow 2s infinite, nudge 5s infinite;
         }
+        @keyframes pulse-glow { 0% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(0, 210, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); } }
+        @keyframes nudge { 0%, 90% { transform: rotate(0); } 95% { transform: rotate(3deg); } 100% { transform: rotate(0); } }
 
-        /* Fenêtre Modale Responsive */
+        /* Fenêtre Modale (Infos Réseau) */
         .modal {
-            display: none;
-            position: fixed; z-index: 100;
-            left: 0; top: 0; width: 100%; height: 100%;
-            background: rgba(4, 11, 46, 0.95);
-            backdrop-filter: blur(10px);
-            justify-content: center; align-items: center;
+            display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%;
+            background: rgba(4, 11, 46, 0.95); backdrop-filter: blur(10px); justify-content: center; align-items: center;
         }
-
         .modal-content {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid var(--glass-border);
-            padding: 30px;
-            border-radius: 25px;
-            width: 85%;
-            max-width: 320px;
-            animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
+            padding: 30px; border-radius: 25px; width: 85%; max-width: 320px;
         }
+        .modal-line { margin: 15px 0; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
+        .modal-line label { color: var(--neon-cyan); font-size: 0.6rem; }
+        .modal-line span { font-size: 1rem; font-weight: 500; }
 
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .modal-line { margin: 15px 0; text-align: left; }
-        .modal-line label { color: var(--neon-cyan); font-size: 0.6rem; text-transform: uppercase; display: block; margin-bottom: 2px; }
-        .modal-line span { color: #fff; font-size: 1rem; font-weight: 500; }
-
-        .close-btn {
-            margin-top: 20px; width: 100%; padding: 12px;
-            background: rgba(0, 210, 255, 0.2);
-            color: #fff; border-radius: 12px; text-align: center; cursor: pointer;
-        }
-
-        @keyframes pulse-glow {
-            0% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0.3); }
-            70% { box-shadow: 0 0 0 10px rgba(0, 210, 255, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(0, 210, 255, 0); }
-        }
-
-        @keyframes nudge {
-            0%, 90% { transform: scale(1); }
-            95% { transform: scale(1.05) rotate(2deg); }
-            100% { transform: scale(1); }
-        }
+        .logout-btn { background: none; border: 1px solid #ff4b4b; color: #ff4b4b; margin-top: 25px; padding: 8px; border-radius: 10px; cursor: pointer; font-size: 0.7rem; width: 100%; }
     </style>
 </head>
 <body>
 
-    <div class="glass-card">
-        <h2>PING MASTER</h2>
-        <input type="number" id="pingInput" pattern="[0-9]*" inputmode="numeric" placeholder="MS" oninput="convert()">
-        
-        <div class="result-container">
-            <span class="result-value" id="val">0</span>
-            <span id="unit" style="color:var(--neon-cyan); font-size:0.7rem; font-weight:bold; letter-spacing:2px;">SECONDE</span>
+    <div id="auth-card" class="glass-card">
+        <h2 id="auth-title">CONNEXION</h2>
+        <div class="form-group">
+            <label>Email</label>
+            <input type="email" id="email" placeholder="mail@exemple.com">
         </div>
+        <div class="form-group">
+            <label>Mot de passe</label>
+            <input type="password" id="password" placeholder="••••••••">
+        </div>
+        <button class="main-btn" id="btn-auth">VALIDER</button>
+        <p class="switch-link" id="auth-switch">Pas encore de compte ? <span>S'inscrire</span></p>
+    </div>
 
+    <div id="app-card" class="glass-card">
+        <h2 id="welcome-user">HELLO</h2>
+        <div class="form-group">
+            <label>Entrez le Ping (ms)</label>
+            <input type="number" id="pingInput" placeholder="0" inputmode="numeric">
+        </div>
+        <div class="result-container">
+            <span class="ping-display" id="val">0</span>
+            <span style="color:var(--neon-cyan); font-weight:bold; font-size:0.7rem; letter-spacing:2px;">SECONDE</span>
+        </div>
         <button class="info-btn" onclick="openModal()">Détails Réseau</button>
+        <button class="logout-btn" id="btn-logout">DÉCONNEXION</button>
     </div>
 
     <div id="infoModal" class="modal">
         <div class="modal-content">
-            <h3 style="color:var(--neon-cyan); margin-top:0; font-size:1rem;">RÉSEAU DÉTECTÉ</h3>
-            <div class="modal-line"><label>Pays</label><span id="country">-</span></div>
-            <div class="modal-line"><label>Ville</label><span id="city">-</span></div>
-            <div class="modal-line"><label>Adresse IP</label><span id="ip">-</span></div>
-            <div class="modal-line"><label>Opérateur</label><span id="isp">-</span></div>
-            <div class="close-btn" onclick="closeModal()">FERMER</div>
+            <h3 style="color:var(--neon-cyan); margin-top:0;">ANALYSE LOCALE</h3>
+            <div class="modal-line"><label>PAYS EXACT</label><br><span id="m-country">-</span></div>
+            <div class="modal-line"><label>VILLE EXACTE</label><br><span id="m-city">-</span></div>
+            <div class="modal-line"><label>ADRESSE IP</label><br><span id="m-ip">-</span></div>
+            <div class="modal-line"><label>OPÉRATEUR</label><br><span id="m-isp">-</span></div>
+            <button class="main-btn" onclick="closeModal()">FERMER</button>
         </div>
     </div>
 
-    <script>
-        const apiKey = 'at_JS8gLN1sxlDSuBBVgh9namJEGQ2TT';
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
 
-        function openModal() { document.getElementById('infoModal').style.display = 'flex'; }
-        function closeModal() { document.getElementById('infoModal').style.display = 'none'; }
+        // CONFIGURATION
+        const SUPABASE_URL = 'https://bbeilgXopnxdxmzuuwhs.supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_iVqDD-8EEQNuQipkbtgb6g_RfE2wTWA';
+        const IPIFY_KEY = 'at_JS8gLN1sxlDSuBBVgh9namJEGQ2TT';
+        
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function fetchGeo() {
-            try {
-                const res = await fetch(`https://geo.ipify.org/api/v2/country,city?apiKey=${apiKey}`);
-                const data = await res.json();
-                document.getElementById('ip').innerText = data.ip;
-                document.getElementById('city').innerText = data.location.city;
-                document.getElementById('country').innerText = data.location.country;
-                document.getElementById('isp').innerText = data.isp;
-            } catch (e) { console.error("API error"); }
-        }
+        // ÉLÉMENTS UI
+        const authCard = document.getElementById('auth-card');
+        const appCard = document.getElementById('app-card');
+        const authTitle = document.getElementById('auth-title');
+        const authSwitch = document.getElementById('auth-switch');
+        const btnAuth = document.getElementById('btn-auth');
+        
+        let isLoginMode = true;
 
-        function convert() {
-            const val = document.getElementById('pingInput').value;
+        // --- NAVIGATION AUTH ---
+        authSwitch.onclick = () => {
+            isLoginMode = !isLoginMode;
+            authTitle.innerText = isLoginMode ? "CONNEXION" : "INSCRIPTION";
+            authSwitch.innerHTML = isLoginMode ? "Pas encore de compte ? <span>S'inscrire</span>" : "Déjà membre ? <span>Se connecter</span>";
+        };
+
+        // --- ACTIONS SUPABASE ---
+        btnAuth.onclick = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if(!email || !password) return alert("Remplis les champs !");
+
+            if (isLoginMode) {
+                const { error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) alert(error.message);
+            } else {
+                const { error } = await supabase.auth.signUp({ email, password });
+                if (error) alert(error.message);
+                else alert("Inscription réussie ! Vérifie tes mails ou connecte-toi.");
+            }
+        };
+
+        document.getElementById('btn-logout').onclick = () => supabase.auth.signOut();
+
+        // --- GESTION DE L'ÉTAT (AUTO-LOGIN) ---
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (session) {
+                authCard.style.display = 'none';
+                appCard.style.display = 'block';
+                document.getElementById('welcome-user').innerText = "BIENVENUE " + session.user.email.split('@')[0].toUpperCase();
+                fetchNetworkInfo();
+            } else {
+                appCard.style.display = 'none';
+                authCard.style.display = 'block';
+            }
+        });
+
+        // --- LOGIQUE PING ---
+        document.getElementById('pingInput').oninput = (e) => {
+            const ms = e.target.value;
             const display = document.getElementById('val');
-            const unit = document.getElementById('unit');
-            if(val && val >= 0) {
-                let sec = val / 1000;
-                let clean = Number(Math.round(sec + 'e6') + 'e-6');
-                display.innerText = (clean.toString().length > 9) ? clean.toExponential(2) : clean;
-                unit.innerText = sec >= 2 ? "SECONDES" : "SECONDE";
-            } else { display.innerText = "0"; unit.innerText = "SECONDE"; }
+            if(ms && ms >= 0) {
+                let sec = ms / 1000;
+                display.innerText = Number(Math.round(sec + 'e6') + 'e-6');
+            } else { display.innerText = "0"; }
+        };
+
+        // --- INFOS RÉSEAU (IPIFY) ---
+        async function fetchNetworkInfo() {
+            try {
+                const res = await fetch(`https://geo.ipify.org/api/v2/country,city?apiKey=${IPIFY_KEY}`);
+                const data = await res.json();
+                document.getElementById('m-country').innerText = data.location.country;
+                document.getElementById('m-city').innerText = data.location.city;
+                document.getElementById('m-ip').innerText = data.ip;
+                document.getElementById('m-isp').innerText = data.isp;
+            } catch (e) { console.error("Network info error"); }
         }
 
-        window.onload = fetchGeo;
+        // --- MODAL CONTROLS ---
+        window.openModal = () => document.getElementById('infoModal').style.display = 'flex';
+        window.closeModal = () => document.getElementById('infoModal').style.display = 'none';
     </script>
 </body>
 </html>
